@@ -1,0 +1,340 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\includegraphics[width=0.67431in,height=0.49306in]{图片1.png}
+\includegraphics[width=0.63264in,height=0.57639in]{图片2.png}
+
+\textbf{Dockerized computational pipeline for SMRT sequence data
+analysis}
+
+Student Name: Xu,Hang
+
+Student ID: 223050032
+
+Programme: Bioinformatics
+
+Course ID: MBI6013
+
+Supervisor: Sun,Hao
+
+Supervisor Signature:
+
+\textbf{Abstract}
+
+Text
+
+\textbf{\hfill\break
+}
+
+\textbf{Introduction}
+
+SMRT (Single Molecule Real-Time) sequencing is a third-generation
+sequencing technology developed by Pacific Biosciences (PacBio). The
+fundamental concept is that DNA polymerase serves as an exceptional
+sequencing tool. Guided by the DNA template strand, it can synthesize a
+new strand with remarkable accuracy, achieving an error rate of
+10\textsuperscript{-5}, and the process is unbiased, eliminating issues
+like GC bias. Furthermore, the enzyme reaction is not only swift,
+reaching speeds of 750bp/s, but it is also efficient, requiring minimal
+ATPs for energy and occupying a small volume. To observe the enzyme
+reaction, we can utilize dNTPs with distinct fluorescent signals to
+capture snapshots of the synthesis process. This approach allows us to
+record the polymerization reaction of the enzyme in detail. Moreover,
+the fluorescent signals are labeled on the polyphosphate moiety of
+dNTPs, ensuring that they have no impact on the enzyme reaction.
+Following the synthesis process, the fluorophores are cleaved from the
+strand, eliminating any fluorophore presence within the strand. This
+approach also prevents steric hindrance and background signal
+accumulation, ensuring accurate and reliable observation of the enzyme
+reaction.\textsuperscript{{[}1{]}}
+
+SMRT is a high-throughput system, posing challenges in accurately
+recording the reaction process of individual polymerases. To overcome
+this, the ZMW Hole (Zero-Mode Waveguide Hole) is utilized to facilitate
+the observation of a single DNA polymerase at a given time.
+\textsuperscript{{[}2{]}}The physics behind this is the zero-mode
+waveguide effect, a phenomenon where, if the aperture is smaller than
+the wavelength of the laser light, the laser is unable to pass through
+the aperture. Instead, it creates a tiny high-energy zone at the
+aperture\textquotesingle s bottom, an area where the laser light can
+reach. By positioning the polymerase within this confined space, we
+create a microscopic environment conducive to observing the
+polymerase\textquotesingle s polymerization reaction. The laser can
+excite the fluorescence of dNTPs.
+
+Compared to the existing second-generation sequencing (NGS)
+technologies, SMRT sequencing offers several advantages. NGS sequencing
+technologies typically have short library insert sizes of around 300
+base pairs (bp), resulting in challenges related to capturing long-range
+genomic information. Both library preparation and sequencing in NGS
+require PCR amplification, resulting in uneven genome coverage and
+difficulties in amplifying regions with high GC content. Consequently,
+certain regions of the genome are challenging to sequence effectively
+using NGS. Furthermore, NGS involves cluster generation, and errors that
+occur during this process are amplified. The sequencing errors in NGS
+are non-random, and increasing sequencing depth does not effectively
+improve accuracy. As a result, NGS struggles to correct errors in
+regions that are prone to frequent errors.
+
+In contrast, SMRT sequencing addresses these limitations by allowing the
+construction of libraries with longer fragments ranging from 1 to 100
+kilobases (kb). This is achieved by attaching hairpin adapters to both
+ends of the DNA double strand, forming a single-stranded circular
+structure. The sequencing process occurs in a rolling-circle way, with
+DNA polymerase initiating from the hairpin adapters within the zero-mode
+waveguide (ZMW) holes. Moreover, SMRT sequencing eliminates the need for
+PCR amplification during library preparation. This results in improved
+library uniformity and eliminates GC bias, enhancing the accuracy and
+representation of the entire genome. SMRT sequencing utilizes phi-29 DNA
+polymerase instead of PCR polymerase, enabling a rolling-circle
+replication mode. The random nature of errors introduced by the
+polymerase during its activity can be reduced by increasing sequencing
+depth, leading to higher accuracy. In fact, SMRT sequencing can achieve
+accuracy levels up to Q50 or Q60 for shorter read lengths, surpassing
+the accuracy attainable by NGS technologies.
+
+Moreover, SMRT sequencing has the unique capability to detect DNA
+modifications during the sequencing process. \textsuperscript{{[}3{]}}It
+utilizes DNA polymerase kinetics to measure the fluorescence signals and
+inter-pulse duration (IPD) between two consecutive bases. By analyzing
+the time differences, it can identify potential base modifications.
+Modified bases exhibit slower kinetics due to steric hindrance,
+resulting in longer time intervals between incorporation events. This
+temporal information allows for the identification and characterization
+of various types of base modifications.\textsuperscript{{[}4{]}}
+
+HiFi Reads, a remarkable feature of SMRT sequencing are used to sequence
+long fragments. These long reads, typically spanning 10 to 25 kilobases
+(kb), provide single-molecular resolution, allowing for the direct
+sequencing of DNA or RNA (cDNA) without the need for amplification. With
+individual molecular accuracy exceeding Q20 (99\%), HiFi Reads deliver
+highly reliable and precise sequence information. What sets them apart
+is their unbiased nature, as HiFi Reads are obtained without DNA
+amplification, minimizing biases associated with GC content and sequence
+complexity. This unbiased approach ensures a comprehensive and
+representative view of the sequenced genome or transcriptome. possesses
+strong strand displacement and continuous synthesis capabilities,
+allowing it to unwind and replicate complex DNA structures. It enables
+isothermal DNA amplification in vitro without the need for thermal
+cycling, resulting in a high yield of high-molecular-weight DNA. With
+3\textquotesingle{} to 5\textquotesingle{} exonuclease proofreading
+activity, it exhibits superior fidelity compared to most other DNA
+polymerases. Rolling Circle Amplification (RCA) is a nucleic acid
+detection method that emulates the natural circular DNA rolling circle
+replication process. Using circular DNA as a template, RCA utilizes a
+short DNA primer that extends and displaces the previously synthesized
+strand, facilitated by Phi29 DNA polymerase. This process leads to the
+generation of repeated long single-stranded DNA products. Additionally,
+HiFi Reads harness the power of Circular Consensus Sequencing (CCS),
+utilizing Phi29 DNA polymerasea (rolling-circle DNA synthesis method) to
+generate multiple subreads during repetitive sequencing. By performing
+error correction within the same molecule, these subreads collectively
+produce exceptionally accurate consensus reads.
+\textsuperscript{{[}5{]}}
+
+SMRT sequencing offers the advantage of longer read lengths compared to
+NGS, as mentioned previously. In comparison to ONT sequencing, SMRT
+sequencing provides additional benefits. In the first place, SMRT
+sequencing exhibits higher raw accuracy than ONT sequencing. This is
+achieved through circular consensus sequencing (CCS), which generates
+multiple passes of the same DNA molecule, allowing for error correction.
+In contrast, ONT sequencing may have higher error rates due to the
+nature of nanopore technology. Secondly, SMRT sequencing excels in
+identifying DNA base modifications, such as DNA methylation, by directly
+detecting the kinetic changes caused by modified bases. This capability
+is particularly valuable for epigenetic studies and understanding gene
+expression regulation. While ONT sequencing can also detect base
+modifications, it may have limitations in accurately distinguishing
+between different types of modifications.
+
+SMRT sequencing data analysis holds profound applications across diverse
+areas of genomics research.\textsuperscript{{[}6{]}} In whole-genome
+sequencing (WGS), its long read lengths and high accuracy enable the
+comprehensive analysis of genetic variation, encompassing single
+nucleotide polymorphisms (SNPs), insertions/deletions (Indels), and
+structural variants. This comprehensive approach is invaluable in
+studying human genetic diseases, cancer genomics, and population
+genetics. Furthermore, SMRT sequencing\textquotesingle s application in
+RNA sequencing contributes significantly to our understanding of dynamic
+gene expression processes. By directly measuring the full length of
+transcripts, it reveals the complexity of transcript isoforms,
+alternative splicing variants, and non-coding RNAs, crucial for gene
+regulation studies, the identification of novel functional transcripts,
+and disease mechanism investigations. In DNA methylation research, SMRT
+sequencing stands out for its unique ability to directly detect dynamic
+changes caused by modified bases, enabling high-sensitivity
+identification of DNA methylation sites. This is paramount in
+epigenetics studies, genome stability assessments, and understanding the
+mechanisms underlying disease occurrence and development. Moreover, SMRT
+sequencing\textquotesingle s ability to differentiate between different
+types of DNA methylation modifications, such as 5-methylcytosine (5mC)
+and 6-methyladenine (6mA), offers powerful tools for delving into the
+functional roles of these modifications in gene regulation.
+
+Especially，SMRT sequencing demonstrates significant advantages in
+analyzing the methylation of circulating free DNA (cfDNA) in plasma,
+particularly for non-invasive early cancer screening.
+\textsuperscript{{[}7{]}}While traditional NGS techniques face
+challenges in detecting long cfDNA fragments, SMRT sequencing overcomes
+this obstacle with its unique capabilities. Firstly, the ultra-long read
+lengths of SMRT sequencing allow for the coverage of longer DNA
+fragments, enabling more comprehensive capture of methylation
+information. In contrast, traditional NGS techniques often struggle with
+long cfDNA fragments, potentially leading to the omission of important
+methylation information. SMRT sequencing, on the other hand, can
+accurately reveal changes in methylation patterns, which often serve as
+early signals for cancer occurrence and development. Secondly, SMRT
+sequencing offers high accuracy and sensitivity, precisely identifying
+methylation sites and their alterations. This precision is crucial for
+distinguishing normal cells from cancer cells, assessing tumor burden
+and metastasis. In comparison, NGS technologies may be limited in
+accurately identifying methylation sites when detecting long cfDNA
+fragments due to read length constraints. SMRT sequencing provides more
+reliable methylation analysis results, offering a more accurate basis
+for personalized treatment strategies. Additionally, SMRT sequencing has
+the ability to directly detect methylation without the need for
+additional chemical processing or conversion steps. This simplifies the
+experimental workflow and reduces potential errors and biases. In
+contrast, NGS techniques may require complex preprocessing and
+conversion processes when detecting methylation, increasing experimental
+complexity and potential sources of error.
+
+Docker is an open-source containerization platform widely used in
+cluster computing environments. It provides a lightweight, portable, and
+scalable containerization solution that allows developers to package
+applications and their dependencies into independent containers,
+enabling fast deployment and portability.\textsuperscript{{[}8{]}}
+
+In cluster computing, Docker offers several advantages. Firstly, Docker
+containers provide isolated runtime environments, allowing different
+applications to run independently in the same cluster without
+interference. This isolation enhances deployment flexibility and reduces
+failures and instability caused by conflicts between applications.
+Secondly, Docker containers are lightweight and have fast startup times.
+As containers share resources with the operating system kernel, they
+generally have much faster startup times compared to traditional virtual
+machines. This enables efficient dynamic scheduling and scaling of
+containers in the cluster, better adapting to changes in computational
+workloads. Additionally, Docker containers possess portability and
+repeatability. Containers package applications and their dependencies
+into a self-contained unit, simplifying and ensuring reliability in
+application deployment and migration. Developers can create and test
+containers in their local development environment and seamlessly deploy
+them to any node in the cluster, without concerns about environment
+configurations and dependencies. Lastly, the Docker ecosystem is rich
+and active. Docker Hub provides a vast repository of public images,
+allowing developers to easily access and share commonly used container
+images. Moreover, Docker supports container orchestration tools such as
+Docker Compose and Kubernetes, facilitating convenient and flexible
+management and orchestration of large-scale containerized applications
+in the cluster.\textsuperscript{{[}9{]}}
+
+\textbf{\hfill\break
+}
+
+\textbf{Materials and Methods}
+
+Text
+
+\textbf{\hfill\break
+}
+
+\textbf{Results}
+
+Text
+
+\textbf{\hfill\break
+}
+
+\textbf{Discussion}
+
+Text
+
+\textbf{\hfill\break
+}
+
+\textbf{Conclusions}
+
+Text
+
+\textbf{\hfill\break
+}
+
+\textbf{References}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Scheres, S. H. RELION: implementation of a Bayesian approach to
+  cryo-EM 1048 structure determination. \emph{J Struct Biol}
+  \textbf{180}, 519-530 (2012).
+\end{enumerate}
+
+\end{document}
